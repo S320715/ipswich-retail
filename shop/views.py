@@ -1,3 +1,4 @@
+from decimal import Decimal
 """Views for the shop application."""
 
 import json
@@ -81,7 +82,7 @@ def cart_view(request):
             continue
 
     shipping = 0 if total >= 30 else 3.99
-    grand_total = total + shipping
+    grand_total = total + Decimal(str(shipping))
 
     logger.info(f'Cart viewed: {len(cart_items)} items, total: £{grand_total}')
 
