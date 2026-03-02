@@ -1,0 +1,28 @@
+# ==========================================
+# Ipswich Retail — Docker Compose
+# Local development configuration
+# ==========================================
+
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    environment:
+      - DJANGO_DEBUG=True
+      - DJANGO_SECRET_KEY=dev-secret-key-change-in-production
+      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py load_sample_data &&
+             python manage.py runserver 0.0.0.0:8000"
+
+volumes:
+  static_volume:
+  media_volume:

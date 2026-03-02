@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% load static cart_tags %}
+
+{% block title %}{{ product.name }} — Ipswich Retail{% endblock %}
+
+{% block content %}
+<section class="py-5" style="background-color: #F8F5FF; min-height: 80vh;">
+    <div class="container">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb" style="font-size: 0.9rem;">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-decoration-none" style="color: #9B8EC4;">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'product_list' %}" class="text-decoration-none" style="color: #9B8EC4;">Shop</a></li>
+                <li class="breadcrumb-item active" style="color: #7A7A8E;">{{ product.name }}</li>
+            </ol>
+        </nav>
+
+        <!-- Product Detail -->
+        <div class="row g-5">
+            <!-- Product Image -->
+            <div class="col-lg-6">
+                <div class="product-detail-image">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-fluid rounded-4 shadow-sm">
+                    {% else %}
+                        <div class="rounded-4 d-flex align-items-center justify-content-center"
+                             style="height: 450px; background: linear-gradient(135deg, #E8E0F3 0%, #FDE8E4 100%);">
+                            <i class="bi bi-image" style="font-size: 5rem; color: #9B8EC4;"></i>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Product Info -->
+            <div class="col-lg-6">
+                <div class="product-info">
+                    <span class="category-tag mb-2">{{ product.get_category_display }}</span>
+                    <h1 class="product-detail-name">{{ product.name }}</h1>
+                    <p class="product-detail-price">£{{ product.price }}</p>
+
+                    <div class="product-meta mb-4">
+                        <span class="meta-badge">
+                            <i class="bi bi-person-hearts me-1"></i>{{ product.get_age_range_display_name }}
+                        </span>
+                    </div>
+
+                    {% if product.description %}
+                    <p class="product-description">{{ product.description }}</p>
+                    {% endif %}
+
+                    <!-- Add to Cart Form -->
+                    <form method="post" action="{% url 'add_to_cart' pk=product.pk %}" id="add-to-cart-form">
+                        {% csrf_token %}
+
+                        <!-- Size Selection -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold" style="color: #2D2D3F;">Select Size</label>
+                            <div class="size-selector">
+                                {% for size in product.get_sizes_list %}
+                                <input type="radio" name="size" value="{{ size }}" id="size-{{ forloop.counter }}"
+                                       class="btn-check" {% if forloop.first %}checked{% endif %}>
+                                <label class="btn btn-size" for="size-{{ forloop.counter }}">{{ size }}</label>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Quantity -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold" style="color: #2D2D3F;">Quantity</label>
+                            <div class="quantity-selector">
+                                <button type="button" class="btn btn-qty" onclick="changeQty(-1)">
+                                    <i class="bi bi-dash"></i>
+                                </button>
+                                <input type="number" name="quantity" id="quantity" value="1" min="1" max="10"
+                                       class="form-control text-center" style="width: 60px;">
+                                <button type="button" class="btn btn-qty" onclick="changeQty(1)">
+                                    <i class="bi bi-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Add to Cart Button -->
+                        <button type="submit" class="btn btn-add-to-cart btn-lg w-100 mb-3">
+                            <i class="bi bi-bag-plus me-2"></i>Add to Cart
+                        </button>
+                    </form>
+
+                    <a href="{% url 'product_list' %}" class="btn btn-outline-back w-100">
+                        <i class="bi bi-arrow-left me-2"></i>Back to Shop
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Products -->
+        {% if related_products %}
+        <div class="mt-5 pt-5">
+            <h3 class="section-title text-center mb-4">You May Also Like</h3>
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
+                {% for product in related_products %}
+                    {% include 'includes/product_card.html' with product=product %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function changeQty(delta) {
+    const input = document.getElementById('quantity');
+    let val = parseInt(input.value) + delta;
+    if (val < 1) val = 1;
+    if (val > 10) val = 10;
+    input.value = val;
+}
+</script>
+{% endblock %}

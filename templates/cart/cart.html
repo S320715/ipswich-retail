@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% load static cart_tags %}
+
+{% block title %}Shopping Cart — Ipswich Retail{% endblock %}
+
+{% block content %}
+<section class="py-5" style="background-color: #F8F5FF; min-height: 80vh;">
+    <div class="container">
+        <h1 class="section-title text-center mb-5">
+            <i class="bi bi-bag me-2"></i>Your Shopping Cart
+        </h1>
+
+        {% if cart_items %}
+        <div class="row g-5">
+            <!-- Cart Items -->
+            <div class="col-lg-8">
+                {% for item in cart_items %}
+                <div class="cart-item-card mb-3">
+                    <div class="row align-items-center g-3">
+                        <!-- Product Image -->
+                        <div class="col-3 col-md-2">
+                            {% if item.product.image %}
+                                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}"
+                                     class="img-fluid rounded-3" style="max-height: 90px; object-fit: cover;">
+                            {% else %}
+                                <div class="rounded-3 d-flex align-items-center justify-content-center"
+                                     style="height: 80px; width: 80px; background: linear-gradient(135deg, #E8E0F3 0%, #FDE8E4 100%);">
+                                    <i class="bi bi-image" style="color: #9B8EC4;"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Product Info -->
+                        <div class="col-9 col-md-4">
+                            <h6 class="mb-1" style="color: #2D2D3F; font-family: 'Nunito', sans-serif;">
+                                <a href="{% url 'product_detail' pk=item.product.pk %}" class="text-decoration-none" style="color: #2D2D3F;">
+                                    {{ item.product.name }}
+                                </a>
+                            </h6>
+                            {% if item.size %}
+                            <span class="badge rounded-pill" style="background-color: #E8E0F3; color: #6B5B8A; font-size: 0.75rem;">
+                                Size: {{ item.size }}
+                            </span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Price -->
+                        <div class="col-4 col-md-2 text-center">
+                            <span style="color: #7A7A8E; font-size: 0.85rem;">£{{ item.product.price }}</span>
+                        </div>
+
+                        <!-- Quantity Controls -->
+                        <div class="col-4 col-md-2">
+                            <div class="d-flex align-items-center justify-content-center">
+                                <form method="post" action="{% url 'update_cart' pk=item.product.pk %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="quantity" value="{{ item.quantity|add:'-1' }}">
+                                    <button type="submit" class="btn btn-sm btn-qty-cart">
+                                        <i class="bi bi-dash"></i>
+                                    </button>
+                                </form>
+                                <span class="mx-2 fw-semibold" style="color: #2D2D3F;">{{ item.quantity }}</span>
+                                <form method="post" action="{% url 'update_cart' pk=item.product.pk %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="quantity" value="{{ item.quantity|add:'1' }}">
+                                    <button type="submit" class="btn btn-sm btn-qty-cart">
+                                        <i class="bi bi-plus"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Subtotal & Remove -->
+                        <div class="col-4 col-md-2 text-end">
+                            <span class="fw-bold" style="color: #E8675A;">£{{ item.subtotal }}</span>
+                            <form method="post" action="{% url 'remove_from_cart' pk=item.product.pk %}" class="mt-1">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm text-muted p-0 border-0" title="Remove item">
+                                    <i class="bi bi-trash3"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Cart Summary -->
+            <div class="col-lg-4">
+                <div class="cart-summary">
+                    <h5 class="mb-4" style="font-family: 'Nunito', sans-serif; color: #2D2D3F;">Order Summary</h5>
+                    
+                    <div class="d-flex justify-content-between mb-2">
+                        <span style="color: #7A7A8E;">Subtotal</span>
+                        <span style="color: #2D2D3F;">£{{ subtotal }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span style="color: #7A7A8E;">Shipping</span>
+                        {% if shipping == 0 %}
+                        <span style="color: #7ECEC1; font-weight: 600;">FREE</span>
+                        {% else %}
+                        <span style="color: #2D2D3F;">£{{ shipping }}</span>
+                        {% endif %}
+                    </div>
+
+                    {% if shipping > 0 %}
+                    <div class="free-shipping-notice mb-3">
+                        <i class="bi bi-truck me-1"></i>
+                        Spend £{{ subtotal|floatformat:2 }} more for free delivery!
+                    </div>
+                    {% endif %}
+
+                    <hr style="border-color: #E8E0F3;">
+
+                    <div class="d-flex justify-content-between mb-4">
+                        <span class="fw-bold" style="color: #2D2D3F; font-size: 1.1rem;">Total</span>
+                        <span class="fw-bold" style="color: #E8675A; font-size: 1.25rem;">£{{ total }}</span>
+                    </div>
+
+                    <button class="btn btn-checkout w-100 btn-lg mb-3" onclick="alert('Thank you for your order! 🎉 This is a PoC — checkout is not yet implemented.')">
+                        <i class="bi bi-lock me-2"></i>Proceed to Checkout
+                    </button>
+
+                    <a href="{% url 'product_list' %}" class="btn btn-outline-back w-100">
+                        <i class="bi bi-arrow-left me-2"></i>Continue Shopping
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        {% else %}
+        <!-- Empty Cart -->
+        <div class="text-center py-5">
+            <div class="empty-cart-icon mb-4">
+                <i class="bi bi-bag-x" style="font-size: 5rem; color: #C4B8DB;"></i>
+            </div>
+            <h3 style="color: #2D2D3F; font-family: 'Nunito', sans-serif;">Your cart is empty!</h3>
+            <p class="text-muted mb-4">Looks like you haven't added anything yet. Browse our lovely collection!</p>
+            <a href="{% url 'product_list' %}" class="btn btn-shop-now btn-lg">
+                <i class="bi bi-bag-heart me-2"></i>Start Shopping
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
