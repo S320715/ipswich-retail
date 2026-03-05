@@ -14,8 +14,8 @@ RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -r re
 COPY . .
 
 RUN python manage.py collectstatic --noinput
-RUN python manage.py migrate --noinput && python manage.py load_sample_data
-RUN python create_admin.py
+RUN python manage.py migrate --noinput
+RUN python manage.py load_sample_data
 
 RUN adduser --disabled-password --gecos '' appuser && chown -R appuser:appuser /app
 USER appuser
