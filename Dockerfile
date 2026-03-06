@@ -16,15 +16,7 @@ COPY . .
 RUN python manage.py collectstatic --noinput
 RUN python manage.py migrate --noinput
 RUN python manage.py load_sample_data
-RUN python -c "
-import django, os
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ipswich_retail.settings')
-django.setup()
-from django.contrib.auth import get_user_model
-User = get_user_model()
-if not User.objects.filter(username='admin123').exists():
-    User.objects.create_superuser('admin123', 'admin@gmail.com', 'admin123')
-"
+RUN python create_admin.py
 
 RUN adduser --disabled-password --gecos '' appuser && chown -R appuser:appuser /app
 USER appuser
